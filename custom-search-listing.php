@@ -104,7 +104,8 @@ class cslf_seaech extends WP_Widget
 
 
 <?php
-$form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
+$title = apply_filters('widget_title', $instance['form_title']);
+        $form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
         $styleData = '';
         if ($form_bg_img != '') {
             $styleData = 'style="background-image: url(' . $form_bg_img . ')"';
@@ -112,9 +113,9 @@ $form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
 
         $Content = '<div class="cslf_form_sec" ' . $styleData . '>
 
-            <img class="form_logo" src="' . esc_url($instance['form_logo']) . '" />
+            <img class="form_logo" src="' . esc_url($instance['form_logo']) . '" />';
 
-            <h2 class="form_heading">' . apply_filters('widget_title', $instance['form_title']) . '</h2>';
+        $Content .= $title && '<h2 class="form_heading">' . $title . '</h2>';
 
         $Content .= '<form class="cslf_form" name="mable-form-1" onsubmit="return false" action="https://mable.com.au/mable-search-results/" method="post">';
 
@@ -127,9 +128,7 @@ $form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
         $Content .= '<input type="hidden" class="cslf_utm" name="UTM" value="' . $instance['form_utm'] . '">';
 
         $Content .= '<input type="hidden" class="cslf_dataIndex" name="dataIndex" value="">';
-
-        $Content .= '<div class="search_icon_sec"><i class="fas fa-search"></i><span>Search</span></div>';
-
+        $Content .= '<div class="search_icon_sec"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path></svg><span>Search</span></div>';
         $Content .= '<div class="cslf_mable_fetch"></div>';
 
         $Content .= '</form>';
@@ -232,21 +231,13 @@ function callback_cslf_additional_style_data()
             .cslf_form_sec .form_heading{
 
                 margin: 20px 0 0 0;
-
                 font-size: 44px;
-
                 line-height: 50px;
-
-                 font-family: "Sofia Pro", Arial, sans-serif;
-
-                 font-weight: bold;
-
-
+                font-family: "Sofia Pro", Arial, sans-serif;
+                font-weight: bold;
             }
 
             .cslf_form{
-
-                margin: 40px 0 0 4px;
 
                 display: -webkit-box;
 
@@ -323,41 +314,27 @@ function callback_cslf_additional_style_data()
 
 
             .search_icon_sec{
-
-                padding: 5px 12px 9px 16px;
-
-                cursor: pointer;
-
-                white-space: nowrap;
-
-                pointer-events: none;
-
-                position: absolute;
-
-                width: 63px;
-
-                left: 7px;
-
-                top: 11px;
-
-                background: #DF720C;
-
-                border: 2px solid #DF720C;
-
-                border-radius:5px;
-
+              padding: 9px 12px 9px 16px;
+              cursor: pointer;
+              white-space: nowrap;
+              pointer-events: none;
+              position: absolute;
+              width: 63px;
+              left: 7px;
+              top: 10%;
+              background: #DF720C;
+              border: 2px solid #DF720C;
+              border-radius: 5px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 80%;
             }
 
 
 
             .search_icon_sec .fa-search{
-
-                margin: 0 5px 0 0;
-
-                padding-left: 5px;
-
-
-
+              height: 75%;
             }
 
             .search_icon_sec span{
