@@ -81,39 +81,18 @@ class cslf_seaech extends WP_Widget
 
         ?>
 
-<!---
-
-    <div class="cslf_form_sec">
-
-        <form action="https://mable.com.au/mable-search-results/" method="get">
-
-            <img class="form_logo" src="<?php echo esc_url($instance['form_logo']); ?>" />
-
-            <h3 class="form_heading"><?php echo apply_filters('widget_title', $instance['form_title']); ?></h3>
-
-            <input type="text" name="suburb" placeholder="Enter suburb or postcode">
-
-            <input type="submit" value="Search">
-
-        </form>
-
-    </div>
-
-    -->
-
-
-
 <?php
 $title = apply_filters('widget_title', $instance['form_title']);
+        $logo = esc_url($instance['form_logo']);
         $form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
         $styleData = '';
         if ($form_bg_img != '') {
             $styleData = 'style="background-image: url(' . $form_bg_img . ')"';
         }
 
-        $Content = '<div class="cslf_form_sec" ' . $styleData . '>
+        $Content = '<div class="cslf_form_sec" ' . $styleData . '>';
 
-            <img class="form_logo" src="' . esc_url($instance['form_logo']) . '" />';
+        $Content .= $logo && '<img class="form_logo" src="' . $logo . '" />';
 
         $Content .= $title && '<h2 class="form_heading">' . $title . '</h2>';
 
@@ -221,11 +200,11 @@ function callback_cslf_additional_style_data()
         <style type="text/css">
 
             .cslf_form_sec{
-
                 max-width: 500px;
                 max-height: 500px;
                 padding: 20px;
-
+                border-radius: 10px;
+box-shadow: 0 12px 17px 2px rgba(69, 43, 65, 0.07), 0 5px 22px 4px rgba(69, 43, 65, 0.06), 0 7px 8px -4px rgba(69, 43, 65, 0.1);
             }
 
             .cslf_form_sec .form_heading{
@@ -631,15 +610,10 @@ function ajax_fetch()
             //return false;
 
             var addressStr = address.replace(/\s+/g, '-').toLowerCase();
-
             var ret = addressStr.split("-");
-
             var retCount = ret.length;
-
             var postKey = retCount - 1;
-
             var suburb = ret[0];
-
             var state = '';
 
             if (retCount > 3) {
@@ -663,13 +637,11 @@ function ajax_fetch()
            var urlNew = "https://mable.com.au/mable-search-results/?search=" + address.replace(/\s+/g, '-').toLowerCase() + "&suburb=" + address;
 
            if(cslf_utm !=''){
-
                urlNew +="&utm_source="+cslf_utm;
-
            }
 
-            window.location.replace(urlNew);
-
+            // window.location.replace(urlNew); // open new window for better UX
+            window.open(urlNew);
             return false;
 
         });
@@ -694,9 +666,7 @@ function cslf_data_fetch()
 {
 
     $keyword = $_POST['keyword'];
-
     $apiUrl = "https://app.mable.com.au/search/suburb_search/" . $keyword . ".json";
-
     $get_file = file_get_contents($apiUrl);
 
     $response = json_decode($get_file, true);
