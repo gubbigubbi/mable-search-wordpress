@@ -1,13 +1,10 @@
 <?php
-
 /*
-
 Plugin Name: Mable Custom Search Listing Form
 Description: Creates a Mable form widget and shortcode to filter by address.
 Version:     1.0.0
 Author:      Mitash
 Author URI: https://www.mitash.com/
-
  */
 
 define("CSLF_DIR_PATH", plugin_dir_path(__FILE__));
@@ -20,7 +17,6 @@ function callback_cslf_ads_widget()
 }
 
 // Enqueue additional admin scripts
-
 add_action('admin_enqueue_scripts', 'cslf_search_wdscript');
 
 function cslf_search_wdscript()
@@ -32,6 +28,17 @@ class cslf_search extends WP_Widget
 {
     public function __construct()
     {
+        parent::__construct(
+
+            // Base ID of your widget
+            'cslf_search',
+
+            // Widget name will appear in UI
+            __('Mable Custom Search Form', 'cslf_search'),
+
+            // Widget description
+            array('description' => __('Creates a Mable form widget and shortcode to filter by address.', 'cslf_search'))
+        );
         add_shortcode('mable_search', array($this, 'cslf_shortcode'));
     }
 
@@ -62,8 +69,8 @@ class cslf_search extends WP_Widget
         ob_start();
         the_widget('cslf_search', $instance, array(
             'widget_id' => '',
-            'before_widget' => '',
-            'after_widget' => '',
+            'before_widget' => '<div id="%1$s" class="widget %2$s"',
+            'after_widget' => '</div>',
             'before_title' => '',
             'after_title' => '',
         ));
@@ -76,13 +83,14 @@ class cslf_search extends WP_Widget
     public function widget($args = [], $instance = [])
     {
 
-        echo $before_widget;
+        echo $args['before_widget'];
 
         ?>
 
 <?php
-$title = apply_filters('widget_title', $instance['form_title']);
-        $logo = isset($instance['form_logo']) ? esc_url($instance['form_logo']) : '';
+$title = $instance['form_title'] ?? null;
+
+        $logo = isset($instance['form_logo']) ? esc_url($instance['form_logo']) : null;
         $form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
         $utm = isset($instance['form_utm']) ? $instance['form_utm'] : '';
         $styleData = '';
@@ -92,9 +100,12 @@ $title = apply_filters('widget_title', $instance['form_title']);
 
         $Content = '<div class="cslf_form_sec" ' . $styleData . '>';
 
-        $Content .= $logo && '<img class="form_logo" src="' . $logo . '" />';
-
-        $Content .= $title && '<h2 class="form_heading">' . $title . '</h2>';
+        if ($logo) {
+            $Content .= '<img class="form_logo" src="' . $logo . '" />';
+        }
+        if ($title) {
+            $Content .= '<h3 class="form_heading">' . $title . '</h3>';
+        }
 
         $Content .= '<form class="cslf_form" name="mable-form-1" onsubmit="return false" action="https://mable.com.au/mable-search-results/" method="post">';
 
@@ -110,52 +121,38 @@ $title = apply_filters('widget_title', $instance['form_title']);
         $Content .= '<div class="search_icon_sec"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path></svg><span>Search</span></div>';
         $Content .= '<div class="cslf_mable_fetch"></div>';
 
-        $Content .= '</form>';
+        $Content .= '</form></div>';
 
         echo $Content;
 
-        echo $after_widget;
+        echo $args['after_widget'];
 
     }
 
     public function update($new_instance, $old_instance)
     {
-
         $instance = $old_instance;
 
         $instance['form_title'] = strip_tags($new_instance['form_title']);
-
         $instance['form_logo'] = strip_tags($new_instance['form_logo']);
-
         $instance['form_bg_img'] = strip_tags($new_instance['form_bg_img']);
-
         $instance['form_utm'] = strip_tags($new_instance['form_utm']);
 
         return $instance;
-
     }
 
     public function form($instance)
     {
 
         ?>
-
-
-
     <p>
-
         <label for="<?php echo $this->get_field_id('form_title'); ?>">Form Title</label><br />
-
         <input type="text" name="<?php echo $this->get_field_name('form_title'); ?>" id="<?php echo $this->get_field_id('form_title'); ?>" value="<?php echo $instance['form_title']; ?>" class="widefat" />
-
     </p>
 
      <p>
-
         <label for="<?php echo $this->get_field_id('form_utm'); ?>">UTM</label><br />
-
         <input type="text" name="<?php echo $this->get_field_name('form_utm'); ?>" id="<?php echo $this->get_field_id('form_utm'); ?>" value="<?php echo $instance['form_utm']; ?>" class="widefat" />
-
     </p>
 
     <p>
@@ -208,11 +205,7 @@ box-shadow: 0 12px 17px 2px rgba(69, 43, 65, 0.07), 0 5px 22px 4px rgba(69, 43, 
             }
 
             .cslf_form_sec .form_heading{
-
-                margin: 20px 0 0 0;
-                font-size: 44px;
-                line-height: 50px;
-                font-family: "Sofia Pro", Arial, sans-serif;
+                margin: 0 0 0.25em 0;
                 font-weight: bold;
             }
 
