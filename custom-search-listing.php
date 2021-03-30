@@ -2,14 +2,10 @@
 
 /*
 
-Plugin Name: Custom Search Listing Form
-
-Description: Create form widget and shortcode to filter by address.
-
+Plugin Name: Mable Custom Search Listing Form
+Description: Creates a Mable form widget and shortcode to filter by address.
 Version:     1.0.0
-
 Author:      Mitash
-
 Author URI: https://www.mitash.com/
 
  */
@@ -20,7 +16,7 @@ add_action('widgets_init', 'callback_cslf_ads_widget');
 
 function callback_cslf_ads_widget()
 {
-    register_widget('cslf_seaech');
+    register_widget('cslf_search');
 }
 
 // Enqueue additional admin scripts
@@ -28,40 +24,43 @@ function callback_cslf_ads_widget()
 add_action('admin_enqueue_scripts', 'cslf_search_wdscript');
 
 function cslf_search_wdscript()
-{
-
-    wp_enqueue_media();
-
-}
+{wp_enqueue_media();}
 
 // Widget
 
-class cslf_seaech extends WP_Widget
+class cslf_search extends WP_Widget
 {
     public function __construct()
     {
         add_shortcode('mable_search', array($this, 'cslf_shortcode'));
     }
 
-    public function cslf_seaech()
+    public function cslf_search()
     {
-        $widget_ops = array('classname' => 'cslf-seaech');
-        $this->WP_Widget('cslf-seaech-widget', 'Custom Search Form', $widget_ops);
+        $widget_ops = array('classname' => 'cslf-search');
+        $this->WP_Widget('cslf-search-widget', 'Custom Search Form', $widget_ops);
     }
 
-    public function cslf_shortcode($atts, $content = null)
+    public function cslf_shortcode($atts = [], $content = null)
     {
 
         extract(shortcode_atts(array(
             'title' => '',
+            'utm' => 'SourceKidsSearch',
+            'form_logo' => '',
+            'form_bg_img' => '',
         ), $atts
         )
         );
 
-        // return 'testing';
+        $instance = array(
+            'form_utm' => $atts['utm'],
+            'form_logo' => $atts['form_logo'],
+            'form_bg_img' => $atts['form_bg_img'],
+        );
 
         ob_start();
-        the_widget('cslf_seaech', $instance, array(
+        the_widget('cslf_search', $instance, array(
             'widget_id' => '',
             'before_widget' => '',
             'after_widget' => '',
@@ -74,7 +73,7 @@ class cslf_seaech extends WP_Widget
 
     }
 
-    public function widget($args, $instance)
+    public function widget($args = [], $instance = [])
     {
 
         echo $before_widget;
@@ -83,8 +82,9 @@ class cslf_seaech extends WP_Widget
 
 <?php
 $title = apply_filters('widget_title', $instance['form_title']);
-        $logo = esc_url($instance['form_logo']);
+        $logo = isset($instance['form_logo']) ? esc_url($instance['form_logo']) : '';
         $form_bg_img = isset($instance['form_bg_img']) ? $instance['form_bg_img'] : '';
+        $utm = isset($instance['form_utm']) ? $instance['form_utm'] : '';
         $styleData = '';
         if ($form_bg_img != '') {
             $styleData = 'style="background-image: url(' . $form_bg_img . ')"';
@@ -104,7 +104,7 @@ $title = apply_filters('widget_title', $instance['form_title']);
 
         $Content .= '<input class="cslf_keyword_input" autocomplete="off" title="Search" name="keyword"  class="form-control" placeholder="Enter suburb or postcode">';
 
-        $Content .= '<input type="hidden" class="cslf_utm" name="UTM" value="' . $instance['form_utm'] . '">';
+        $Content .= '<input type="hidden" class="cslf_utm" name="UTM" value="' . $utm . '">';
 
         $Content .= '<input type="hidden" class="cslf_dataIndex" name="dataIndex" value="">';
         $Content .= '<div class="search_icon_sec"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path></svg><span>Search</span></div>';
@@ -590,7 +590,6 @@ function ajax_fetch()
           if (address == 'Search') {
 
             var address = jQuery('.cslf_mable_fetch').val();
-
             var addressStr = address.replace(/\s+/g, '-').toLowerCase();
 
           } else {
@@ -617,49 +616,39 @@ function ajax_fetch()
             var state = '';
 
             if (retCount > 3) {
-
               state = ret[1] + ' ' + ret[2];
-
             } else {
-
               state = ret[1];
-
             }
 
             var postcode = ret[postKey];
 
           }
 
-            var cslf_utm = jQuery('.cslf_utm').val();
+          var cslf_utm = jQuery('.cslf_utm').val();
 
+          // console.log(encodeURIComponent(address));
+          var urlNew = "https://mable.com.au/mable-search-results/?search=" + address.replace(/\s+/g, '-').toLowerCase() + "&suburb=" + encodeURIComponent(address);
 
+          if(cslf_utm !=''){
+              urlNew +="&utm="+cslf_utm;
+          }
 
-           var urlNew = "https://mable.com.au/mable-search-results/?search=" + address.replace(/\s+/g, '-').toLowerCase() + "&suburb=" + address;
-
-           if(cslf_utm !=''){
-               urlNew +="&utm_source="+cslf_utm;
-           }
-
-            // window.location.replace(urlNew); // open new window for better UX
-            window.open(urlNew);
-            return false;
+          // window.location.replace(urlNew); // open new window for better UX
+          window.open(urlNew);
+          return false;
 
         });
 
       });
 
     </script>
-
-
-
   <?php
 
 }
 
 // The Mable Live Ajax Function
-
 add_action('wp_ajax_cslf_data_fetch', 'cslf_data_fetch');
-
 add_action('wp_ajax_nopriv_cslf_data_fetch', 'cslf_data_fetch');
 
 function cslf_data_fetch()
@@ -671,44 +660,25 @@ function cslf_data_fetch()
 
     $response = json_decode($get_file, true);
 
-    //$response = json_encode($json_to_array);
-
     if (empty($response)) {
-
         echo 'No Record Found';
-
     } else {
 
         echo '<ul class="mable-search-list">';
-
         $recdi = '1';
-
         foreach ($response as $data) {
-
             //index
-
             $index = $data['index'];
-
             $address = $data['address'];
-
             if ($recdi <= '10') {
-
                 echo '<li data-index = ' . $index . ' class="mable-search-item"><a href="#">' . $address . '</a></li>';
-
             }
-
             $recdi++;
-
         }
-
         echo '</ul>';?>
-
-
-
 <?php
 
     }
-
     die();
 
 }
